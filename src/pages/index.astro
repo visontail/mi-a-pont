@@ -1,0 +1,155 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { programs } from '../data/programs';
+import { jegySorok, vizsgaSorok, otodikTargyak, nyelvOpciok } from '../data/constants';
+---
+
+<Layout>
+  <main>
+    <form id="form" class="layout" autocomplete="off" onsubmit="return false">
+      <div class="form">
+      <section class="card">
+        <h2>Év végi jegyek</h2>
+        <p class="hint">Az utolsó két tanult év jegyei. Ha egy tárgyat csak 9–10.-ben tanultál, azokat írd be.</p>
+        <div class="grades">
+          <span></span><span class="col">Utolsó előtti év</span><span class="col">Utolsó év</span>
+          {jegySorok.map(([id, nev]) => (
+            <>
+              <span class="row-label">{nev}</span>
+              {[0, 1].map((y) => (
+                <select name={`j_${id}_${y}`} aria-label={`${nev}, ${y ? 'utolsó év' : 'utolsó előtti év'}`}>
+                  <option value="">–</option>
+                  {[5, 4, 3, 2, 1].map((n) => <option value={n}>{n}</option>)}
+                </select>
+              ))}
+            </>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Érettségi</h2>
+        <p class="hint">Az érettségi pontot a szaknál elfogadott két legjobb tárgyad adja. Ezeket automatikusan kiválasztjuk.</p>
+        <div class="exams">
+          {[...vizsgaSorok, ['otodik', '']].map(([id, nev], idx) => (
+            <div class="exam">
+              {id === 'otodik' ? (
+                <select name="v_targy_4" class="exam-subject" aria-label="5. érettségi tárgy">
+                  {otodikTargyak.map(([v, n]) => <option value={v}>{n}</option>)}
+                </select>
+              ) : (
+                <span class="row-label">{nev}</span>
+              )}
+              <label class="pct">
+                <input type="number" name={`v_pct_${idx}`} min="0" max="100" inputmode="numeric" placeholder="0" aria-label={`${nev || '5. tárgy'} százalék`} />
+                <span>%</span>
+              </label>
+              <div class="seg" role="radiogroup" aria-label={`${nev || '5. tárgy'} szint`}>
+                <label><input type="radio" name={`v_szint_${idx}`} value="kozep" checked /><span>Közép</span></label>
+                <label><input type="radio" name={`v_szint_${idx}`} value="emelt" /><span>Emelt</span></label>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Intézményi pontok</h2>
+        <p class="hint">Max. 100 pont, minden szak maga dönti el, mire ad. Az emelt és a középszintű érettségiért járó pontokat automatikusan számoljuk.</p>
+
+        <h3>Nyelvvizsga</h3>
+        <div class="two">
+          <label class="field">
+            <span class="label">Az érettségizett nyelvből</span>
+            <select name="nyelv_0">{nyelvOpciok.map(([v, n]) => <option value={v}>{n}</option>)}</select>
+          </label>
+          <label class="field">
+            <span class="label">Másik nyelvből</span>
+            <select name="nyelv_1">{nyelvOpciok.map(([v, n]) => <option value={v}>{n}</option>)}</select>
+          </label>
+        </div>
+
+        <h3>Esélyegyenlőség</h3>
+        <div class="checks">
+          <label><input type="checkbox" name="esely" value="hh" /> Hátrányos helyzet</label>
+          <label><input type="checkbox" name="esely" value="fogy" /> Fogyatékosság</label>
+          <label><input type="checkbox" name="esely" value="gyes" /> Gyermekgondozás</label>
+        </div>
+
+        {programs.filter((p) => p.extrak.length).map((p) => (
+          <div data-program={p.id} hidden>
+            <h3>{p.nev}: további pontok</h3>
+            <div class="checks">
+              {p.extrak.map((e) => (
+                <label><input type="checkbox" name="extra" value={e.id} /> {e.cimke} <span class="pts">+{e.pont}</span></label>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <h3>Sport, verseny, egyéb</h3>
+        <label class="field">
+          <span class="label">Pontok összesen</span>
+          <input type="number" name="egyeb" min="0" max="100" inputmode="numeric" placeholder="0" />
+        </label>
+        {programs.map((p) => <p class="hint" data-program={p.id} hidden>{p.egyebTipp}</p>)}
+
+        <h3>Katonai szolgálat</h3>
+        <label class="field">
+          <span class="label">Jogszabály alapján, az intézményi pontokon felül</span>
+          <select name="katonai">
+            <option value="0">Nincs</option>
+            <option value="16">Alapkiképzés (16)</option>
+            <option value="32">6 hónap szakkiképzéssel (32)</option>
+            <option value="64">12 hónap (64)</option>
+          </select>
+        </label>
+      </section>
+      </div>
+
+      <div class="side">
+        <section class="card">
+          <h2>Szak</h2>
+          <label class="field">
+            <span class="label">Hova jelentkezel?</span>
+            <select name="program">
+              {programs.map((p) => <option value={p.id}>{p.nev}</option>)}
+            </select>
+          </label>
+          {programs.map((p) => (
+            <p class="meta" data-program={p.id} hidden>
+              Választott egyetem: <strong>{p.egyetem}, {p.varos}</strong>
+              <br />Legutóbbi ponthatár: <strong>{p.ponthatar.pont}</strong> ({p.ponthatar.ev}, állami, nappali)
+              · Szabályok: {p.adatEv} ·{' '}
+              <a href={p.forras} target="_blank" rel="noopener">forrás</a>
+              {p.emeltKell ? <><br />Legalább egy emelt szintű érettségi kell.</> : <><br />Emelt szintű érettségi nem kötelező.</>}
+              {p.megjegyzes && <><br /><span class="warn">{p.megjegyzes}</span></>}
+            </p>
+          ))}
+        </section>
+        <aside class="result card" aria-live="polite">
+          <div class="total"><span id="osszes">0</span><span class="of">/ 500 pont</span></div>
+          <div class="bar" aria-hidden="true"><span id="bar1"></span><span id="bar2"></span><span id="bar3"></span></div>
+          <dl class="rows">
+            <div><dt><i class="dot d1"></i><span id="l1">Tanulmányi pont</span></dt><dd id="r1">0</dd></div>
+            <div><dt><i class="dot d2"></i>Érettségi pont</dt><dd id="r2">0</dd></div>
+            <div><dt><i class="dot d3"></i>Intézményi pont</dt><dd id="r3">0</dd></div>
+            <div id="rowKat" hidden><dt>Katonai szolgálat</dt><dd id="r4">0</dd></div>
+          </dl>
+          <p class="method" id="modszer"></p>
+          <p class="compare" id="hasonlit"></p>
+          <ul class="warnings" id="figyelm"></ul>
+          <details>
+            <summary>Részletek</summary>
+            <dl class="rows small" id="reszletek"></dl>
+          </details>
+        </aside>
+        <a class="how" href="hogyan/">Hogyan számolunk? →</a>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    import '../scripts/app';
+  </script>
+</Layout>

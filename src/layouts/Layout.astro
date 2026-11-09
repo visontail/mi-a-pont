@@ -1,0 +1,28 @@
+---
+import '../styles/global.css';
+import '../styles/page.css';
+
+const { title = 'Mi A Pont' } = Astro.props;
+---
+
+<html lang="hu">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Pszichológia BA felvételi pontszámító a 2027-es eljárásra." />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="hero">
+      <h1>Mi A Pont</h1>
+      <p class="lead">Pszichológia BA felvételi pontszámító · 2027</p>
+    </header>
+
+    <slot />
+
+    <footer class="foot">
+      Tájékoztató jellegű számítás. A végleges szabályokat ellenőrizd a <a href="https://www.felvi.hu" target="_blank" rel="noopener">felvi.hu</a> oldalon. Semmilyen adatot nem mentünk.
+      <br />Made by <span role="img" aria-label="love">❤️</span> Leo
+    </footer>
+  </body>
+</html>
