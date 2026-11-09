@@ -1,0 +1,6 @@
+// Static site: upload dist/ as plain assets, no Worker code.
+{
+  "name": "mi-a-pont",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./dist" }
+}
