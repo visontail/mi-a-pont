@@ -89,9 +89,19 @@ mi-a-pont/
 
 Sources: eduline.hu (2026 pontszámítás, 2027–28, psychology ponthatárok 2026-07-07, ELTE intézményi pontok 2026-01-31, Pázmány intézményi pontok 2026-02-07, Károli 2025), gtk.elte.hu/pontszamitas2026, ktk.pte.hu/pontszamitas-reszletei-2026, btk.ppke.hu/pontszamitas, felveteli.uni-pannon.hu/intezmenyi-pontok, pte.hu/hu/felveteli/kepzes/pszichologia-magyar-vagy-angol-nyelven-alapszak (2027), pmi.htk.uni-pannon.hu, szavon.hu (2026-06-29), telex.hu (2026-07-23).
 
-## Implementation status (2026-11-07)
-- Done: project scaffolded (Astro 7, Vitest 5); `src/lib/calc.ts`, `src/data/programs.ts`, `src/lib/calc.test.ts` (21 tests passing), `src/pages/index.astro`, `src/styles/global.css`. `npm run build` outputs static `dist/index.html`.
-- Old Next.js skeleton `~/Developer/uni-point-counter` was deleted (user's request).
-- Browser-checked 2026-11-07 (desktop 1280 + 375 mobile, light + dark). Fixed: styles made `is:global` (JS-built Részletek rows were unstyled due to Astro scoping); compact mobile result bar (~150px) with Részletek toggle + 85dvh scroll cap; desktop sticky card capped to viewport; viewport-fit=cover + safe-area padding.
-- Next: check on a real iPhone (Safari safe area, select pickers).
-- Still open: KRE 2026 values, Pannon esélyegyenlőség value, PPKE/KRE accepted subjects (need felvi.hu text from the user).
+## Implementation status (2026-11-09)
+- **Live:** https://mi-a-pont.the051425.workers.dev/ (Cloudflare Workers, static assets). Repo: https://github.com/visontail/mi-a-pont. Every push to `main` redeploys. `wrangler.jsonc` uploads `dist/` as plain assets; without it, `wrangler deploy` tries to convert the site to server-rendered Astro and fails. Node is pinned via `.node-version` (22) and `engines` (Astro needs ≥ 22.23.4).
+- **Files:**
+  - `src/layouts/Layout.astro`: shared head, header, footer ("Made by ❤️ Leo"), CSS imports
+  - `src/pages/index.astro`: calculator markup
+  - `src/pages/hogyan.astro`: "Hogyan számolunk?" explanation page, linked under the result card
+  - `src/scripts/app.ts`: form reading and result rendering
+  - `src/styles/global.css`: colour tokens and base styles
+  - `src/styles/page.css`: page styles
+  - `src/data/constants.ts`: form lists, `TARGYAK`, `NEV`
+  - `src/data/programs.ts`: the 5 programs (`nev` = short dropdown label, `egyetem` = full name shown as "Választott egyetem")
+  - `src/lib/calc.ts` with `calc.test.ts`: 21 tests passing
+- **Layout:** desktop has the form on the left and a sticky right column with the Szak card above the result card. On phones the Szak card comes first and the result is a compact sticky bottom bar with a Részletek toggle. Dropdowns use a custom CSS chevron inset 16px. The page CSS is global, not Astro-scoped, because the JS builds the Részletek rows.
+- **Checked:** headless Chrome at 1280px and 375px, light and dark mode; live URLs return 200.
+- **Next:** check on a real iPhone (Safari safe area, select pickers). Verify the full university/faculty names in `programs.ts`, which were written from memory (especially Pannon "Humántudományi Kar").
+- **Still open:** KRE 2026 values, Pannon esélyegyenlőség value, PPKE/KRE accepted subjects (need felvi.hu text from the user).
